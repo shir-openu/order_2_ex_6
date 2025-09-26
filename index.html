@@ -201,8 +201,8 @@ const problems = [
     /* ============================================================================
        TAB_EXERCISE_DATA_START - Exercise Tab Content
        ============================================================================ */
-    latexProblem: String.raw``,
-    exampleInput: String.raw``,
+    latexProblem: String.raw`y'' + y = \tan x`,
+    exampleInput: String.raw`y = C_1*cos(x) + C_2*sin(x)`,
     /* ============================================================================
        TAB_EXERCISE_DATA_END
        ============================================================================ */
@@ -210,7 +210,14 @@ const problems = [
     /* ============================================================================
        TAB_HINT1_DATA_START - Hint 1 Tab Content
        ============================================================================ */
-    hint1Html: ``,
+    hint1Html: `
+      זוהי משוואה לינארית אי-הומוגנית מסדר שני עם מקדמים קבועים.<br/>
+      השתמשו בשיטת וריאציית הפרמטרים לפתרון.<br/>
+      הפתרון הכללי: \\(y = y_h + y_p\\)<br/>
+      כאשר \\(y_h\\) הוא הפתרון של המשוואה ההומוגנית \\(y'' + y = 0\\)<br/>
+      המשוואה ההומוגנית: \\(r^2 + 1 = 0\\) עם שורשים \\(r = \\pm i\\)<br/>
+      מהו הפתרון ההומוגני?
+    `,
     /* ============================================================================
        TAB_HINT1_DATA_END
        ============================================================================ */
@@ -218,7 +225,13 @@ const problems = [
     /* ============================================================================
        TAB_HINT2_DATA_START - Hint 2 Tab Content
        ============================================================================ */
-    hint2Html: ``,
+    hint2Html: `
+      הפונקציה \\(g(x) = \\tan x\\) דורשת וריאציית פרמטרים כי אינה מתאימה להשוואת מקדמים.<br/>
+      הפתרון ההומוגני: \\(y_h = C_1 \\cos x + C_2 \\sin x\\)<br/>
+      לוריאציית פרמטרים: \\(y_1 = \\cos x, y_2 = \\sin x\\)<br/>
+      חשבו את הרונסקיאן: \\(W(y_1, y_2) = \\begin{vmatrix} \\cos x & \\sin x \\\\ -\\sin x & \\cos x \\end{vmatrix}\\)<br/>
+      הפתרון הפרטי: \\(y_p = -y_1 \\int \\frac{y_2 g(x)}{W} dx + y_2 \\int \\frac{y_1 g(x)}{W} dx\\)
+    `,
     /* ============================================================================
        TAB_HINT2_DATA_END
        ============================================================================ */
@@ -226,8 +239,17 @@ const problems = [
     /* ============================================================================
        TAB_SOLUTION_DATA_START - Solution Tab Content
        ============================================================================ */
-    solutionDisplayLatex: String.raw``,
-    solutionStepsHtml: ``,
+    solutionDisplayLatex: String.raw`y = C_1 \cos x + C_2 \sin x - \cos x \ln \left| \frac{1 + \sin x}{\cos x} \right|`,
+    solutionStepsHtml: `
+      המשוואה ההומוגנית: \\(y'' + y = 0\\) עם \\(r^2 + 1 = 0\\).<br/>
+      שורשים מרוכבים: \\(r = \\pm i\\).<br/>
+      הפתרון ההומוגני: \\(y_h = C_1 \\cos x + C_2 \\sin x\\).<br/>
+      לפתרון פרטי בוריאציית פרמטרים: \\(y_1 = \\cos x, y_2 = \\sin x\\).<br/>
+      הרונסקיאן: \\(W(y_1, y_2) = \\cos^2 x + \\sin^2 x = 1\\).<br/>
+      חישוב האינטגרלים: \\(\\int \\sin x \\tan x \\, dx = \\int \\sin x \\cdot \\frac{\\sin x}{\\cos x} \\, dx = \\int \\frac{\\sin^2 x}{\\cos x} \\, dx\\).<br/>
+      לאחר עיבוד האינטגרלים מקבלים: \\(y_p = -\\cos x \\ln \\left| \\frac{1+\\sin x}{\\cos x} \\right|\\).<br/>
+      הפתרון הכללי: \\(y = C_1 \\cos x + C_2 \\sin x - \\cos x \\ln \\left| \\frac{1+\\sin x}{\\cos x} \\right|\\).
+    `,
     /* ============================================================================
        TAB_SOLUTION_DATA_END
        ============================================================================ */
@@ -364,6 +386,68 @@ function normalizeToPlain(s){
    EXERCISE-SPECIFIC CHECKING FUNCTIONS (ספציפיות לתרגיל הנוכחי)
    ============================================================================ */
 const currentCheck = { type: null, homogeneousTerms: [], particularTerm: '', particularCoeff: 1 };
+
+/* ============================================================================
+   TAB_CHECKING_DATA_START - Exercise-Specific Checking Function
+   ============================================================================ */
+function checkTanxSolution(userRaw) {
+    if (!userRaw || !userRaw.trim()) return false;
+    
+    try {
+        console.log('CHECKING TAN(X) SOLUTION - VERSION 2.0');
+        console.log('Raw input:', userRaw);
+        
+        // Normalize input - handle both cos(x)/sin(x) and cosx/sinx formats
+        let normalized = normalizeToPlain(userRaw).toLowerCase().replace(/\s+/g, '');
+        console.log('Normalized input:', normalized);
+        
+        // Handle both formats: cos(x) and cosx, sin(x) and sinx
+        normalized = normalized.replace(/cos\s*x(?!\w)/g, 'cos(x)');
+        normalized = normalized.replace(/sin\s*x(?!\w)/g, 'sin(x)');
+        console.log('After format normalization:', normalized);
+        
+        // Remove y= prefix if exists
+        normalized = normalized.replace(/^y\s*=\s*/, '');
+        
+        // Check for forbidden constant terms (like +1, -1, +5, etc.)
+        const hasConstantTerm = /^[^a-z]*[+\-]\s*\d+\s*$|[+\-]\s*\d+\s*[+\-]|[+\-]\s*\d+\s*$/.test(normalized);
+        if (hasConstantTerm) {
+            console.log('REJECTION: Found constant term (like +1, -1, etc.)');
+            return false;
+        }
+        
+        // Check for required components
+        const hasCosTerm = /c_?\d*\s*\*?\s*cos\(x\)|cos\(x\)\s*\*?\s*c_?\d*|\d*\s*\*?\s*c_?\d*\s*\*?\s*cos\(x\)|\d*\s*c_?\d*\s*\*?\s*cos\(x\)/i.test(normalized);
+        const hasSinTerm = /c_?\d*\s*\*?\s*sin\(x\)|sin\(x\)\s*\*?\s*c_?\d*|\d*\s*\*?\s*c_?\d*\s*\*?\s*sin\(x\)|\d*\s*c_?\d*\s*\*?\s*sin\(x\)/i.test(normalized);
+        const hasLogTerm = /cos\(x\)\s*\*?\s*ln|ln.*cos\(x\)/i.test(normalized);
+        const hasCorrectLogContent = /ln.*\|\s*.*1.*sin.*cos.*\||\|\s*.*1.*sin.*cos.*\|.*ln/i.test(normalized);
+        const hasMinusSignBeforeLog = /-\s*cos\(x\)\s*\*?\s*ln|-\s*ln.*cos\(x\)/i.test(normalized);
+        
+        console.log('Component checks:');
+        console.log('- Cos term:', hasCosTerm);
+        console.log('- Sin term:', hasSinTerm);
+        console.log('- Logarithmic term:', hasLogTerm);
+        console.log('- Correct log content:', hasCorrectLogContent);
+        console.log('- Minus sign before log:', hasMinusSignBeforeLog);
+        console.log('- Has constant term (should be false):', hasConstantTerm);
+        
+        // All components must be present, and no constant terms allowed
+        if (hasCosTerm && hasSinTerm && hasLogTerm && hasCorrectLogContent && hasMinusSignBeforeLog && !hasConstantTerm) {
+            console.log('ALL CHECKS PASSED - TAN(X) SOLUTION ACCEPTED');
+            return true;
+        } else {
+            console.log('SOME CHECKS FAILED - SOLUTION REJECTED');
+            return false;
+        }
+        
+    } catch (err) {
+        console.error('Error in tan(x) checker:', err);
+        return false;
+    }
+}
+/* ============================================================================
+   TAB_CHECKING_DATA_END
+   ============================================================================ */
 
 function checkVariationParametersSolution(userRaw) {
     if (!userRaw || !userRaw.trim()) return false;
@@ -533,7 +617,7 @@ waitForLibraries(function(){
       try {
         const normalized = normalizeToPlain(raw0);
         console.log('Auto-detected LaTeX, normalized to:', normalized);
-        const ok = checkVariationParametersSolution(raw0);
+        const ok = checkTanxSolution(raw0);
         el.className='status ' + (ok?'ok':'bad'); 
         el.textContent = ok ? 'תשובה נכונה' : 'תשובה לא נכונה';
       } catch(err) {
@@ -546,7 +630,7 @@ waitForLibraries(function(){
       el.textContent='בדיקת נכונות לא פועלת במצב LaTeX מוכרח - בטלו הסימון לבדיקה';
     } else {
       // Plain mode - normal check
-      const ok = checkVariationParametersSolution(raw0);
+      const ok = checkTanxSolution(raw0);
       el.className='status ' + (ok?'ok':'bad'); 
       el.textContent = ok ? 'תשובה נכונה' : 'תשובה לא נכונה';
     }
