@@ -84,6 +84,7 @@
     border-radius: 12px;
     max-height: 300px;
     overflow-y: auto;
+    position: relative;
   }
   .ai-message {
     margin: 8px 0;
@@ -95,6 +96,21 @@
   .ai-loading {
     color: var(--muted);
     font-style: italic;
+  }
+  .btn-close-ai {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    background: var(--field);
+    border: 1px solid var(--ring);
+    color: var(--ink);
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .btn-close-ai:hover {
+    border-color: var(--accent);
   }
 
   .status{font-size:.9rem;margin-top:6px;text-align:right}
@@ -134,7 +150,7 @@
       <button class="tab-btn" role="tab" aria-selected="true"  aria-controls="tab-ex"   id="tabbtn-ex">תרגיל</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-h1"  id="tabbtn-h1">רמז 1</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-h2"  id="tabbtn-h2">רמז 2</button>
-  //    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-sol" id="tabbtn-sol">הצגת הפתרון</button>
+      <!-- <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-sol" id="tabbtn-sol">הצגת הפתרון</button> -->
     </div>
 
     <!-- Panel: תרגיל -->
@@ -181,11 +197,10 @@ y = C_1*sin(x) + C_2*cos(x)"></textarea>
 
           <div id="checkMsg" class="status" style="margin-top:10px"></div>
           
-         // <div id="aiResponse" class="ai-chat-box" style="display:none"></div>
-		    <div id="aiResponse" class="ai-chat-box" style="display:none">
-            <button class="btn" id="btnCloseAI" style="float:left; font-size:0.85rem; padding:4px 10px">סגירה ×</button>
+          <div id="aiResponse" class="ai-chat-box" style="display:none">
+            <button class="btn-close-ai" id="btnCloseAI">סגירה ×</button>
             <div id="aiResponseContent"></div>
-</div>
+          </div>
 
           <div class="hint">
 		    • ביטוי מורכב יש לשים בתוך { }<br/>
@@ -237,8 +252,7 @@ const problems = [
     title: 'מסדר שני — וריאציית פרמטרים',
     
     latexProblem: String.raw`y'' + y = \tan x`,
-    // exampleInput: String.raw`y = C_1*cos(x) + C_2*sin(x)`,
-	exampleInput: String.raw`y = C_1 f(x) + C_2 g(x) + \sin(x) \cdot \ln|x+1| + \frac{x^2}{2}`,
+    exampleInput: String.raw`y = C_1 f(x) + C_2 g(x) + \sin(x) \cdot \ln|x+1| + \frac{x^2}{2}`,
     
     hint1Html: `
       זוהי משוואה לינארית אי-הומוגנית מסדר שני עם מקדמים קבועים.<br/>
@@ -432,6 +446,7 @@ waitForLibraries(function(){
   const btnClear = document.getElementById('btnClear');
   const btnCheck = document.getElementById('btnCheck');
   const btnAIHelp = document.getElementById('btnAIHelp');
+  const btnCloseAI = document.getElementById('btnCloseAI');
 
   function setStatus(msg, cls){
     const el = document.getElementById('status');
@@ -516,7 +531,7 @@ waitForLibraries(function(){
     }
     
     aiBox.style.display = 'block';
-    aiBox.innerHTML = '<div class="ai-message ai-loading">מתבצעת בדיקת הקלט שלכם, המתינו מספר שניות...</div>';
+    document.getElementById('aiResponseContent').innerHTML = '<div class="ai-message ai-loading">מתבצעת בדיקת הקלט שלכם, המתינו מספר שניות...</div>';
     
     try {
       const response = await fetch(API_ENDPOINT, {
@@ -538,7 +553,7 @@ waitForLibraries(function(){
       const data = await response.json();
       
       if (data.error) {
-        aiBox.innerHTML = '<div class="ai-message" style="color:var(--bad)">שגיאה: ' + data.error + '</div>';
+        document.getElementById('aiResponseContent').innerHTML = '<div class="ai-message" style="color:var(--bad)">שגיאה: ' + data.error + '</div>';
         return;
       }
       
@@ -550,36 +565,36 @@ waitForLibraries(function(){
       displayAIResponse();
       
     } catch (error) {
-      aiBox.innerHTML = '<div class="ai-message" style="color:var(--bad)">לא ניתן להתחבר לשרת</div>';
+      document.getElementById('aiResponseContent').innerHTML = '<div class="ai-message" style="color:var(--bad)">לא ניתן להתחבר לשרת</div>';
       console.error(error);
     }
   });
 
-function displayAIResponse() {
-  const aiBox = document.getElementById('aiResponseContent');
-  let html = '';
-  
-  conversationHistory.forEach((turn, i) => {
-    html += `<div class="ai-message">
-      <strong>התשובה שהוזנה:</strong> <code>${turn.user}</code>
-    </div>`;
-    html += `<div class="ai-message" style="background:#1e2940">
-      <strong>Digital Friend:</strong> ${turn.ai}
-    </div>`;
+  // Close AI button
+  btnCloseAI.addEventListener('click', function() {
+    document.getElementById('aiResponse').style.display = 'none';
+    conversationHistory = [];
   });
-  
-  aiBox.innerHTML = html;
-  
-  if (window.MathJax?.typesetPromise) {
-    MathJax.typesetPromise([aiBox]);
-  }
-}
 
-// כפתור סגירה
-document.getElementById('btnCloseAI').addEventListener('click', function() {
-  document.getElementById('aiResponse').style.display = 'none';
-  conversationHistory = [];
-});
+  function displayAIResponse() {
+    const aiBox = document.getElementById('aiResponseContent');
+    let html = '';
+    
+    conversationHistory.forEach((turn, i) => {
+      html += `<div class="ai-message">
+        <strong>התשובה שהוזנה:</strong> <code>${turn.user}</code>
+      </div>`;
+      html += `<div class="ai-message" style="background:#1e2940">
+        <strong>Digital Friend:</strong> ${turn.ai}
+      </div>`;
+    });
+    
+    aiBox.innerHTML = html;
+    
+    if (window.MathJax?.typesetPromise) {
+      MathJax.typesetPromise([aiBox]);
+    }
+  }
 
   async function loadProblem(index=0){
     const p = problems[index];
