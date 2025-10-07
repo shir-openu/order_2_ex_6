@@ -202,12 +202,12 @@ y = C_1*sin(x) + C_2*cos(x)"></textarea>
             <div id="aiResponseContent"></div>
           </div>
 
-          <div class="hint">
-		    • ביטוי מורכב יש לשים בתוך { }<br/>
-            • בדיקת נכונות פועלת בקלט Plain<br/>
-			• הטקסט הקיים במסך אינו פתרון התרגיל אלא דוגמה לכתיבת משוואה ב-LaTeX<br/>
-            • יש להשתמש אך ורק בקבועים מהצורה: C_1, C_2, C_3 … עבור הפתרון ההומוגני<br/>
-          </div>
+         <div class="hint">
+  • ביטוי מורכב יש לשים בתוך { }<br/>
+  • בדיקת נכונות פועלת בקלט Plain<br/>
+  • יש להשתמש אך ורק בקבועים מהצורה: C_1, C_2, C_3 … עבור הפתרון ההומוגני<br/>
+  • דוגמה לכתיבה ב-LaTeX: <code style="color:var(--muted)">y = C_1 \sin(x) + C_2 \cos(x) + x \ln|x| + \frac{x^2}{2}</code><br/>
+</div>
         </section>
       </div>
     </section>
@@ -252,7 +252,7 @@ const problems = [
     title: 'מסדר שני — וריאציית פרמטרים',
     
     latexProblem: String.raw`y'' + y = \tan x`,
-    exampleInput: String.raw`y = C_1 f(x) + C_2 g(x) + \sin(x) \cdot \ln|x+1| + \frac{x^2}{2}`,
+    exampleInput: '',
     
     hint1Html: `
       זוהי משוואה לינארית אי-הומוגנית מסדר שני עם מקדמים קבועים.<br/>
