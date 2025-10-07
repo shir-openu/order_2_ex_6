@@ -575,12 +575,13 @@ waitForLibraries(function(){
         return;
       }
       
-      conversationHistory.push({
-        user: userInput,
-        ai: data.hint
-      });
-      
-      displayAIResponse();
+     // לא שומרים היסטוריה - מציגים רק תשובה אחרונה
+conversationHistory = [{
+  user: userInput,
+  ai: data.hint
+}];
+
+displayAIResponse();
       
     } catch (error) {
       document.getElementById('aiResponseContent').innerHTML = '<div class="ai-message" style="color:var(--bad)">לא ניתן להתחבר לשרת</div>';
