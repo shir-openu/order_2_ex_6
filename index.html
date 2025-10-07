@@ -94,9 +94,23 @@
     line-height: 1.6;
   }
   .ai-loading {
-    color: var(--muted);
-    font-style: italic;
-  }
+  color: var(--muted);
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--ring);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
   .btn-close-ai {
     position: absolute;
     top: 8px;
@@ -533,7 +547,7 @@ waitForLibraries(function(){
     }
     
     aiBox.style.display = 'block';
-    document.getElementById('aiResponseContent').innerHTML = '<div class="ai-message ai-loading">מתבצעת בדיקת הקלט שלכם, המתינו מספר שניות...</div>';
+    document.getElementById('aiResponseContent').innerHTML = '<div class="ai-message ai-loading"><div class="spinner"></div>מתבצעת בדיקת הקלט שלכם, המתינו מספר שניות...</div>';
     
     try {
       const response = await fetch(API_ENDPOINT, {
