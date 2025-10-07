@@ -193,18 +193,12 @@ y = C_1*sin(3x) + C_2*cos(2x) + x*ln|x| + (x^2)/2"></textarea>
 
           
           <div class="controls">
-            <span class="pill"><input type="checkbox" id="forceLatex"><label for="forceLatex" style="margin:0">מצב LaTeX</label></span>
-            <button class="btn" id="btnClear">ניקוי</button>
-            <button class="btn" id="btnCheck">בדיקת תשובה</button>
-            <button class="btn btn-ai" id="btnAIHelp">Digital Friend</button>
-            <span class="pill">מצב בדיקה
-              <select id="checkMode">
-                <option value="general" selected>פתרון כללי</option>
-              </select>
-            </span>
-          </div>
+  <button class="btn" id="btnClear">ניקוי</button>
+  <!-- <button class="btn" id="btnCheck">בדיקת תשובה</button> -->
+  <button class="btn btn-ai" id="btnAIHelp">Digital Friend</button>
+</div>
 
-          <div id="status" class="status"></div>
+<div id="status" class="status"></div>
 
           <label style="margin-top:10px;display:block">תצוגה</label>
           <div id="render" class="render"></div>
@@ -510,7 +504,7 @@ waitForLibraries(function(){
     inputEl.focus();
   });
   
-  btnCheck.addEventListener('click', ()=>{
+/*  btnCheck.addEventListener('click', ()=>{
     const raw0 = inputEl.value, raw = sanitizeBasic(raw0);
     const latexMode = forceLatexEl.checked || looksLikeLatex(raw);
     const el = document.getElementById('checkMsg');
@@ -534,7 +528,7 @@ waitForLibraries(function(){
       el.className='status ' + (ok?'ok':'bad'); 
       el.textContent = ok ? 'תשובה נכונה' : 'תשובה לא נכונה';
     }
-  });
+  });    */
 
   // AI Helper
   btnAIHelp.addEventListener('click', async function() {
