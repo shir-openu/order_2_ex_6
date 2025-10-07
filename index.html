@@ -511,7 +511,7 @@ waitForLibraries(function(){
     }
     
     aiBox.style.display = 'block';
-    aiBox.innerHTML = '<div class="ai-message ai-loading">חושב...</div>';
+    aiBox.innerHTML = '<div class="ai-message ai-loading">מתבצעת בדיקת הקלט שלכם, המתינו מספר שניות...</div>';
     
     try {
       const response = await fetch(API_ENDPOINT, {
