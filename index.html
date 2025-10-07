@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>תרגיל</title>
-// order-2-ex-6.vercel.app /////////////////////////////////////////
+
 <!-- MathJax v3 -->
 <script>
   window.MathJax = {
@@ -67,6 +67,36 @@
   .btn{cursor:pointer;background:var(--field);border:1px solid var(--ring);color:var(--ink);padding:8px 12px;border-radius:10px}
   .btn:hover{border-color:var(--accent)}
 
+  .btn-ai {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+  }
+  .btn-ai:hover {
+    opacity: 0.9;
+    border: 1px solid var(--accent);
+  }
+  .ai-chat-box {
+    margin-top: 12px;
+    padding: 14px;
+    background: #1a1f35;
+    border: 1px solid #667eea;
+    border-radius: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .ai-message {
+    margin: 8px 0;
+    padding: 10px;
+    background: var(--field);
+    border-radius: 8px;
+    line-height: 1.6;
+  }
+  .ai-loading {
+    color: var(--muted);
+    font-style: italic;
+  }
+
   .status{font-size:.9rem;margin-top:6px;text-align:right}
   .status.ok{color:var(--ok)} .status.bad{color:var(--bad)}
 
@@ -79,7 +109,7 @@
   select{background:var(--field);color:var(--ink);border:1px solid var(--ring);border-radius:10px;padding:6px 8px}
 </style>
 <style>
-  /* ADDITION: סגנון מינימלי לסרגל המשוואות */
+  /* סגנון מינימלי לסרגל המשוואות */
   .eqtb-wrap{ margin:8px 0 }
   .eqtb{
     display:flex; flex-wrap:wrap; gap:.4rem; align-items:center;
@@ -122,7 +152,7 @@
 
 <label for="inputRaw">קלט Plain או LaTeX</label>
 
-<!-- ADDITION: mount לעורך המשוואות מעל תיבת הקלט -->
+<!-- mount לעורך המשוואות מעל תיבת הקלט -->
 <div id="eqToolbar" class="eqtb-wrap" aria-label="עורך משוואות (הוספת סמלים)"></div>
 
 <textarea id="inputRaw" rows="6"
@@ -136,6 +166,7 @@ y = C_1*sin(x) + C_2*cos(x)"></textarea>
             <span class="pill"><input type="checkbox" id="forceLatex"><label for="forceLatex" style="margin:0">מצב LaTeX</label></span>
             <button class="btn" id="btnClear">ניקוי</button>
             <button class="btn" id="btnCheck">בדיקת תשובה</button>
+            <button class="btn btn-ai" id="btnAIHelp">Digital Friend</button>
             <span class="pill">מצב בדיקה
               <select id="checkMode">
                 <option value="general" selected>פתרון כללי</option>
@@ -149,6 +180,8 @@ y = C_1*sin(x) + C_2*cos(x)"></textarea>
           <div id="render" class="render"></div>
 
           <div id="checkMsg" class="status" style="margin-top:10px"></div>
+          
+          <div id="aiResponse" class="ai-chat-box" style="display:none"></div>
 
           <div class="hint">
 		    • ביטוי מורכב יש לשים בתוך { }<br/>
@@ -190,26 +223,18 @@ y = C_1*sin(x) + C_2*cos(x)"></textarea>
   </div>
 
 <script>
-/* =========================
-   מבנה נתונים של תרגילים
-   ========================= */
+// API Endpoint
+const API_ENDPOINT = 'https://order-2-ex-6.vercel.app/api/ai-hint';
+
+/* מבנה נתונים של תרגילים */
 const problems = [
   {
     id: 'ode_second_order_variation_params_01',
     title: 'מסדר שני — וריאציית פרמטרים',
     
-    /* ============================================================================
-       TAB_EXERCISE_DATA_START - Exercise Tab Content
-       ============================================================================ */
     latexProblem: String.raw`y'' + y = \tan x`,
     exampleInput: String.raw`y = C_1*cos(x) + C_2*sin(x)`,
-    /* ============================================================================
-       TAB_EXERCISE_DATA_END
-       ============================================================================ */
     
-    /* ============================================================================
-       TAB_HINT1_DATA_START - Hint 1 Tab Content
-       ============================================================================ */
     hint1Html: `
       זוהי משוואה לינארית אי-הומוגנית מסדר שני עם מקדמים קבועים.<br/>
       השתמשו בשיטת וריאציית הפרמטרים לפתרון.<br/>
@@ -218,13 +243,7 @@ const problems = [
       המשוואה ההומוגנית: \\(r^2 + 1 = 0\\) עם שורשים \\(r = \\pm i\\)<br/>
       מהו הפתרון ההומוגני?
     `,
-    /* ============================================================================
-       TAB_HINT1_DATA_END
-       ============================================================================ */
     
-    /* ============================================================================
-       TAB_HINT2_DATA_START - Hint 2 Tab Content
-       ============================================================================ */
     hint2Html: `
       הפונקציה \\(g(x) = \\tan x\\) דורשת וריאציית פרמטרים כי אינה מתאימה להשוואת מקדמים.<br/>
       הפתרון ההומוגני: \\(y_h = C_1 \\cos x + C_2 \\sin x\\)<br/>
@@ -232,13 +251,7 @@ const problems = [
       חשבו את הרונסקיאן: \\(W(y_1, y_2) = \\begin{vmatrix} \\cos x & \\sin x \\\\ -\\sin x & \\cos x \\end{vmatrix}\\)<br/>
       הפתרון הפרטי: \\(y_p = -y_1 \\int \\frac{y_2 g(x)}{W} dx + y_2 \\int \\frac{y_1 g(x)}{W} dx\\)
     `,
-    /* ============================================================================
-       TAB_HINT2_DATA_END
-       ============================================================================ */
     
-    /* ============================================================================
-       TAB_SOLUTION_DATA_START - Solution Tab Content
-       ============================================================================ */
     solutionDisplayLatex: String.raw`y = C_1 \cos x + C_2 \sin x - \cos x \ln \left| \frac{1 + \sin x}{\cos x} \right|`,
     solutionStepsHtml: `
       המשוואה ההומוגנית: \\(y'' + y = 0\\) עם \\(r^2 + 1 = 0\\).<br/>
@@ -250,9 +263,6 @@ const problems = [
       לאחר עיבוד האינטגרלים מקבלים: \\(y_p = -\\cos x \\ln \\left| \\frac{1+\\sin x}{\\cos x} \\right|\\).<br/>
       הפתרון הכללי: \\(y = C_1 \\cos x + C_2 \\sin x - \\cos x \\ln \\left| \\frac{1+\\sin x}{\\cos x} \\right|\\).
     `,
-    /* ============================================================================
-       TAB_SOLUTION_DATA_END
-       ============================================================================ */
     
     check: {
       type: 'variation_parameters_form',
@@ -263,9 +273,7 @@ const problems = [
   }
 ];
 
-/* =========================
-   Tabs
-   ========================= */
+/* Tabs */
 (function(){
   const buttons = [...document.querySelectorAll('.tab-btn')];
   const panels  = [...document.querySelectorAll('.tab-panel')];
@@ -277,9 +285,7 @@ const problems = [
   buttons.forEach(btn=>btn.addEventListener('click', ()=>activate(btn.getAttribute('aria-controls'))));
 })();
 
-/* =========================
-   Render helpers
-   ========================= */
+/* Render helpers */
 function waitForLibraries(cb){
   let tries=0;(function check(){
     if (typeof math!=='undefined' && window.MathJax) cb();
@@ -300,10 +306,7 @@ function setHtml(id, html){
   if (window.MathJax?.typesetPromise){ MathJax.typesetPromise([el]); }
 }
 
-/* ============================================================================
-   GENERAL INPUT PROCESSING FUNCTIONS (כלליות לזיהוי קלט)
-   START_GENERAL_INPUT_SECTION - DO NOT MODIFY THIS SECTION
-   ============================================================================ */
+/* Input processing functions */
 function sanitizeBasic(s){ return (s||'').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,'').trim() }
 function looksLikeLatex(s){ 
   return /\\[a-zA-Z]+|\\\[|\\\]|\\\(|\\\)|\$(?!\s*$)|\\int|\\sum|\\frac|\\sqrt|\\sin|\\cos|\\exp|\\cdot/.test(s) 
@@ -311,10 +314,9 @@ function looksLikeLatex(s){
 function insertImplicitMult(s){
   const id = '([A-Za-z](?:[A-Za-z0-9_]*))';
   
-  // חדש — אל תיגע בקריאות לפונקציות מוכרות (exp, sin, cos, …)
   s = s.replace(
     new RegExp(
-      '\\b' + id + '\\s*(?=\\()(?!(?:\\s*\\)))' // זהות + "("
+      '\\b' + id + '\\s*(?=\\()(?!(?:\\s*\\)))' 
     , 'g'),
     (m)=> {
       const name = m.replace(/\s*\($/,'').trim();
@@ -323,7 +325,6 @@ function insertImplicitMult(s){
     }
   );
   
-  // הוסף מכפלה משתמעת בין קבועים (כמו C1, C_1) לפונקציות (כמו sin, cos)
   s = s.replace(/\b([Cc]_?\d+)\s*([a-zA-Z]+\()/g, '$1*$2');
   
   s = s.replace(new RegExp(id + '\\s*(?=\\b[xX]\\b)', 'g'), '$1*');
@@ -332,17 +333,13 @@ function insertImplicitMult(s){
   return s;
 }
 function convertMathNotation(s){
-  // Handle e^(...) patterns - more comprehensive
   s = s.replace(/\be\s*\^\s*\(/g, 'exp(');
   s = s.replace(/\be\s*\^\s*([a-zA-Z_]\w*)/g, 'exp($1)');
   s = s.replace(/\be\s*\^\s*([0-9]+)/g, 'exp($1)');
   s = s.replace(/\be\s*\^\s*\{([^}]+)\}/g, 'exp($1)');
   
-  // Handle missing multiplication signs in exponential arguments
-  // Convert exp(2x) to exp(2*x), exp(3x) to exp(3*x), etc.
   s = s.replace(/exp\((\d+)([a-zA-Z])\)/g, 'exp($1*$2)');
   
-  // Handle other missing multiplications like 2x, 3x, etc.
   s = s.replace(/(\d+)([a-zA-Z])/g, '$1*$2');
   
   s = s.replace(/\^/g, '**');
@@ -352,24 +349,15 @@ function normalizeToPlain(s){
   let t = sanitizeBasic(s);
   t = t.replace(/^\s*[yY]\s*(\(\s*x\s*\))?\s*=\s*/, '');
   
-  // Convert LaTeX fractions to decimal/fraction format
   t = t.replace(/\\frac\{1\}\{2\}/g, '0.5');
   t = t.replace(/\\frac\{(\d+)\}\{(\d+)\}/g, '$1/$2');
   
-  // Add multiplication after fractions when followed by variables/functions
-  // Handle cases like "0.5e^x" -> "0.5*e^x"
   t = t.replace(/(0\.5|1\/2|\d+\/\d+)([a-zA-Z])/g, '$1*$2');
   
-  // Convert LaTeX subscripts to underscore format
-  // Convert C_{1}, C_{2} to C_1, C_2
   t = t.replace(/C_\{(\d+)\}/g, 'C_$1');
   
-  // ADDITION TODAY: Add (x) to trigonometric and other functions if missing
-  // Handle "sinx", "cosx" etc. (function directly followed by x)
   t = t.replace(/\b(sin|cos|tan|exp|ln|log|sqrt)x\b/g, '$1(x)');
-  // Handle "sin x", "cos x" etc. (function followed by space and x)  
   t = t.replace(/\b(sin|cos|tan|exp|ln|log|sqrt)\s+x\b/g, '$1(x)');
-  // Handle bare functions at end of string or before operators/spaces
   t = t.replace(/\b(sin|cos|tan|exp|ln|log|sqrt)(?=\s*[\+\-\*\/\s]|$)/g, '$1(x)');
   
   t = t.replace(/(\d),(\d)/g,'$1.$2');
@@ -378,45 +366,30 @@ function normalizeToPlain(s){
   return t;
 }
 
-/* ============================================================================
-   END_GENERAL_INPUT_SECTION - DO NOT MODIFY ABOVE THIS LINE
-   ============================================================================ */
-
-/* ============================================================================
-   EXERCISE-SPECIFIC CHECKING FUNCTIONS (ספציפיות לתרגיל הנוכחי)
-   ============================================================================ */
 const currentCheck = { type: null, homogeneousTerms: [], particularTerm: '', particularCoeff: 1 };
 
-/* ============================================================================
-   TAB_CHECKING_DATA_START - Exercise-Specific Checking Function
-   ============================================================================ */
 function checkTanxSolution(userRaw) {
     if (!userRaw || !userRaw.trim()) return false;
     
     try {
-        console.log('CHECKING TAN(X) SOLUTION - VERSION 2.0');
+        console.log('CHECKING TAN(X) SOLUTION');
         console.log('Raw input:', userRaw);
         
-        // Normalize input - handle both cos(x)/sin(x) and cosx/sinx formats
         let normalized = normalizeToPlain(userRaw).toLowerCase().replace(/\s+/g, '');
         console.log('Normalized input:', normalized);
         
-        // Handle both formats: cos(x) and cosx, sin(x) and sinx
         normalized = normalized.replace(/cos\s*x(?!\w)/g, 'cos(x)');
         normalized = normalized.replace(/sin\s*x(?!\w)/g, 'sin(x)');
         console.log('After format normalization:', normalized);
         
-        // Remove y= prefix if exists
         normalized = normalized.replace(/^y\s*=\s*/, '');
         
-        // Check for forbidden constant terms (like +1, -1, +5, etc.)
         const hasConstantTerm = /^[^a-z]*[+\-]\s*\d+\s*$|[+\-]\s*\d+\s*[+\-]|[+\-]\s*\d+\s*$/.test(normalized);
         if (hasConstantTerm) {
-            console.log('REJECTION: Found constant term (like +1, -1, etc.)');
+            console.log('REJECTION: Found constant term');
             return false;
         }
         
-        // Check for required components
         const hasCosTerm = /c_?\d*\s*\*?\s*cos\(x\)|cos\(x\)\s*\*?\s*c_?\d*|\d*\s*\*?\s*c_?\d*\s*\*?\s*cos\(x\)|\d*\s*c_?\d*\s*\*?\s*cos\(x\)/i.test(normalized);
         const hasSinTerm = /c_?\d*\s*\*?\s*sin\(x\)|sin\(x\)\s*\*?\s*c_?\d*|\d*\s*\*?\s*c_?\d*\s*\*?\s*sin\(x\)|\d*\s*c_?\d*\s*\*?\s*sin\(x\)/i.test(normalized);
         const hasLogTerm = /cos\(x\)\s*\*?\s*ln|ln.*cos\(x\)/i.test(normalized);
@@ -431,12 +404,11 @@ function checkTanxSolution(userRaw) {
         console.log('- Minus sign before log:', hasMinusSignBeforeLog);
         console.log('- Has constant term (should be false):', hasConstantTerm);
         
-        // All components must be present, and no constant terms allowed
         if (hasCosTerm && hasSinTerm && hasLogTerm && hasCorrectLogContent && hasMinusSignBeforeLog && !hasConstantTerm) {
-            console.log('ALL CHECKS PASSED - TAN(X) SOLUTION ACCEPTED');
+            console.log('ALL CHECKS PASSED');
             return true;
         } else {
-            console.log('SOME CHECKS FAILED - SOLUTION REJECTED');
+            console.log('SOME CHECKS FAILED');
             return false;
         }
         
@@ -445,124 +417,16 @@ function checkTanxSolution(userRaw) {
         return false;
     }
 }
-/* ============================================================================
-   TAB_CHECKING_DATA_END
-   ============================================================================ */
 
-function checkVariationParametersSolution(userRaw) {
-    if (!userRaw || !userRaw.trim()) return false;
-    
-    try {
-        console.log('STARTING FRESH CHECK - VERSION 2.0');
-        console.log('Raw input:', userRaw);
-        
-        // FIRST: Check for negative patterns in original LaTeX/Plain input
-        const originalLower = userRaw.toLowerCase();
-        console.log('Checking original input for negative patterns...');
-        
-        if (/-\s*\\frac\{1\}\{2\}/.test(originalLower) || 
-            /-\s*1\/2/.test(originalLower) || 
-            /-\s*0\.5/.test(originalLower)) {
-            console.log('IMMEDIATE REJECTION: Found negative coefficient in original input');
-            return false;
-        }
-        
-        // Normalize input
-        const normalized = normalizeToPlain(userRaw).toLowerCase().replace(/\s+/g, '');
-        console.log('Normalized input:', normalized);
-        
-        // Split into signed terms
-        const terms = normalized.split(/([+\-])/).filter(t => t.trim() !== '');
-        const signedTerms = [];
-        let currentSign = '+';
-        
-        for (let i = 0; i < terms.length; i++) {
-            const term = terms[i];
-            if (term === '+' || term === '-') {
-                currentSign = term;
-            } else if (term.trim()) {
-                signedTerms.push(currentSign + term);
-                currentSign = '+';
-            }
-        }
-        
-        console.log('Signed terms:', signedTerms);
-        
-        // Check each term
-        let cosCount = 0, sinCount = 0, expCount = 0;
-        
-        for (let term of signedTerms) {
-            console.log('Analyzing term:', term);
-            
-            const isNegative = term.startsWith('-');
-            const cleanTerm = term.replace(/^[+\-]/, '');
-            
-            if (/^c(?:_?\d*)\*?cos\(x\)$/.test(cleanTerm) || /^cos\(x\)\*?c(?:_?\d*)$/.test(cleanTerm) || /^c(?:_?\d*)\*?cos\s*x$/.test(cleanTerm) || /^cos\s*x\*?c(?:_?\d*)$/.test(cleanTerm) || /^[\d\-]*\*?c(?:_?\d*)\*?cos\(x\)$/.test(cleanTerm) || /^[\d\-]*c(?:_?\d*)\*?cos\(x\)$/.test(cleanTerm) || /^[\d\-]*\*?c(?:_?\d*)\*?cos\s*x$/.test(cleanTerm) || /^[\d\-]*c(?:_?\d*)\*?cos\s*x$/.test(cleanTerm)) {
-                cosCount++;
-                console.log('Found cos term:', term);
-            } else if (/^c(?:_?\d*)\*?sin\(x\)$/.test(cleanTerm) || /^sin\(x\)\*?c(?:_?\d*)$/.test(cleanTerm) || /^c(?:_?\d*)\*?sin\s*x$/.test(cleanTerm) || /^sin\s*x\*?c(?:_?\d*)$/.test(cleanTerm) || /^[\d\-]*\*?c(?:_?\d*)\*?sin\(x\)$/.test(cleanTerm) || /^[\d\-]*c(?:_?\d*)\*?sin\(x\)$/.test(cleanTerm) || /^[\d\-]*\*?c(?:_?\d*)\*?sin\s*x$/.test(cleanTerm) || /^[\d\-]*c(?:_?\d*)\*?sin\s*x$/.test(cleanTerm)) {
-                sinCount++;
-                console.log('Found sin term:', term);
-            } else if (/0\.5.*exp\(x\)|exp\(x\).*0\.5|1\/2.*exp\(x\)|exp\(x\).*1\/2/.test(cleanTerm)) {
-                console.log('Found potential exp term, checking sign and coefficient...');
-                
-                if (isNegative) {
-                    console.log('REJECTION: Negative exp coefficient detected!');
-                    return false;
-                }
-                
-                // Check if coefficient is exactly 1/2 or 0.5
-                const hasCorrectCoeff = /^0\.5\*?exp\(x\)$|^exp\(x\)\*?0\.5$|^1\/2\*?exp\(x\)$|^exp\(x\)\*?1\/2$|^\(0\.5\)\*?exp\(x\)$|^exp\(x\)\*?\(0\.5\)$|^\(1\/2\)\*?exp\(x\)$|^exp\(x\)\*?\(1\/2\)$/.test(cleanTerm);
-                
-                if (!hasCorrectCoeff) {
-                    console.log('REJECTION: Wrong exp coefficient - must be exactly 1/2 or 0.5');
-                    console.log('   Clean term was:', cleanTerm);
-                    return false;
-                }
-                
-                expCount++;
-                console.log('Found correct positive exp term with 1/2 coefficient:', term);
-            } else if (/exp\(x\)/.test(cleanTerm)) {
-                console.log('REJECTION: exp term without proper coefficient');
-                return false;
-            } else {
-                console.log('REJECTION: Invalid term');
-                return false;
-            }
-        }
-        
-        console.log('Final counts - cos:', cosCount, 'sin:', sinCount, 'exp:', expCount);
-        
-        // Check counts
-        if (cosCount !== 1 || sinCount !== 1 || expCount !== 1) {
-            console.log('REJECTION: Wrong number of terms');
-            return false;
-        }
-        
-        // Check constants
-        const constants = normalized.match(/c(?:_?\d+)/g) || [];
-        if (constants.length < 2) {
-            console.log('REJECTION: Not enough constants');
-            return false;
-        }
-        
-        console.log('ALL CHECKS PASSED - SOLUTION ACCEPTED');
-        return true;
-        
-    } catch (err) {
-        console.error('Error in checker:', err);
-        return false;
-    }
-}
+/* UI wiring + loadProblem */
+let conversationHistory = [];
 
-/* =========================
-   UI wiring + loadProblem
-   ========================= */
 waitForLibraries(function(){
   const inputEl = document.getElementById('inputRaw');
   const forceLatexEl = document.getElementById('forceLatex');
   const btnClear = document.getElementById('btnClear');
   const btnCheck = document.getElementById('btnCheck');
+  const btnAIHelp = document.getElementById('btnAIHelp');
 
   function setStatus(msg, cls){
     const el = document.getElementById('status');
@@ -584,7 +448,6 @@ waitForLibraries(function(){
         const node = math.parse(plain);
         let latex = node.toTex({ parenthesis:'keep', implicit:'show' });
         
-        // Fix the CORRECT pattern - mathjs returns C\_1 not C_1
         latex = latex.replace(/C\\_1/g, 'C_{1}');
         latex = latex.replace(/C\\_2/g, 'C_{2}');
         latex = latex.replace(/C\\_3/g, 'C_{3}');
@@ -602,18 +465,21 @@ waitForLibraries(function(){
 
   inputEl.addEventListener('input', ()=>debounce(process,120));
   forceLatexEl.addEventListener('change', process);
-  document.getElementById('btnClear').addEventListener('click', ()=>{
+  
+  btnClear.addEventListener('click', ()=>{
     inputEl.value=''; document.getElementById('render').innerHTML=''; setStatus('','');
-    document.getElementById('checkMsg').textContent=''; inputEl.focus();
+    document.getElementById('checkMsg').textContent=''; 
+    document.getElementById('aiResponse').style.display='none';
+    conversationHistory = [];
+    inputEl.focus();
   });
-  document.getElementById('btnCheck').addEventListener('click', ()=>{
+  
+  btnCheck.addEventListener('click', ()=>{
     const raw0 = inputEl.value, raw = sanitizeBasic(raw0);
     const latexMode = forceLatexEl.checked || looksLikeLatex(raw);
     const el = document.getElementById('checkMsg');
     
-    // Try to normalize LaTeX input for checking
     if(latexMode && !forceLatexEl.checked) {
-      // Auto-detected LaTeX - try to normalize and check
       try {
         const normalized = normalizeToPlain(raw0);
         console.log('Auto-detected LaTeX, normalized to:', normalized);
@@ -625,16 +491,84 @@ waitForLibraries(function(){
         el.textContent='שגיאה בניתוח LaTeX - נסו במצב Plain או סמנו "מצב LaTeX"';
       }
     } else if(latexMode && forceLatexEl.checked) {
-      // Forced LaTeX mode - don't check
       el.className='status bad'; 
       el.textContent='בדיקת נכונות לא פועלת במצב LaTeX מוכרח - בטלו הסימון לבדיקה';
     } else {
-      // Plain mode - normal check
       const ok = checkTanxSolution(raw0);
       el.className='status ' + (ok?'ok':'bad'); 
       el.textContent = ok ? 'תשובה נכונה' : 'תשובה לא נכונה';
     }
   });
+
+  // AI Helper
+  btnAIHelp.addEventListener('click', async function() {
+    const userInput = sanitizeBasic(inputEl.value);
+    const aiBox = document.getElementById('aiResponse');
+    
+    if (!userInput) {
+      alert('יש להזין תשובה לפני בקשת עזרה');
+      return;
+    }
+    
+    aiBox.style.display = 'block';
+    aiBox.innerHTML = '<div class="ai-message ai-loading">חושב...</div>';
+    
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userInput: userInput,
+          problemData: {
+            question: problems[0].latexProblem,
+            correctSolution: problems[0].solutionDisplayLatex,
+            steps: problems[0].solutionStepsHtml,
+            hint1: problems[0].hint1Html,
+            hint2: problems[0].hint2Html
+          },
+          conversationHistory: conversationHistory
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        aiBox.innerHTML = '<div class="ai-message" style="color:var(--bad)">שגיאה: ' + data.error + '</div>';
+        return;
+      }
+      
+      conversationHistory.push({
+        user: userInput,
+        ai: data.hint
+      });
+      
+      displayAIResponse();
+      
+    } catch (error) {
+      aiBox.innerHTML = '<div class="ai-message" style="color:var(--bad)">לא ניתן להתחבר לשרת</div>';
+      console.error(error);
+    }
+  });
+
+  function displayAIResponse() {
+    const aiBox = document.getElementById('aiResponse');
+    let html = '';
+    
+    conversationHistory.forEach((turn, i) => {
+      html += `<div class="ai-message">
+        <strong>התשובה שהוזנה:</strong> <code>${turn.user}</code>
+      </div>`;
+      html += `<div class="ai-message" style="background:#1e2940">
+        <strong>Digital Friend:</strong> ${turn.ai}
+      </div>`;
+    });
+    
+    aiBox.innerHTML = html;
+    
+    if (window.MathJax?.typesetPromise) {
+      MathJax.typesetPromise([aiBox]);
+    }
+  }
 
   async function loadProblem(index=0){
     const p = problems[index];
@@ -659,7 +593,7 @@ waitForLibraries(function(){
 </script>
 
 <script>
-/* ADDITION: מודול עורך משוואות — הזרקת טקסט בלבד לשדה #inputRaw */
+/* מודול עורך משוואות */
 (function(){
   function insertAtCaret(el, before, after){
     el.focus();
@@ -670,7 +604,6 @@ waitForLibraries(function(){
     el.value = el.value.slice(0, s) + text + el.value.slice(e);
     const pos = sel ? s + before.length + sel.length : s + before.length;
     el.setSelectionRange(pos, pos);
-    // מיידעים את הקוד הקיים שלי שהטקסט השתנה — כדי לשמר את כל ההתנהגות
     el.dispatchEvent(new Event('input',  { bubbles:true }));
     el.dispatchEvent(new Event('change', { bubbles:true }));
   }
@@ -682,7 +615,6 @@ waitForLibraries(function(){
     return b;
   }
 
-  // פונקציה ציבורית לאתחול — לא דורכת על שמות קיימים
   window.initEquationToolbar = function(opts){
     const input = document.querySelector(opts.target);
     const mount = document.querySelector(opts.mount);
@@ -718,11 +650,9 @@ const items = [
 })();
 </script>
 
-<!-- אתחול: מפעיל את העורך על #inputRaw ומתקין אותו ב-#eqToolbar -->
 <script>
   initEquationToolbar({ target:'#inputRaw', mount:'#eqToolbar' });
 </script>
-
 
 </body>
 </html>
