@@ -452,10 +452,10 @@ let conversationHistory = [];
 
 waitForLibraries(function(){
   const inputEl = document.getElementById('inputRaw');
-  const forceLatexEl = document.getElementById('forceLatex');
-  const btnClear = document.getElementById('btnClear');
-  const btnCheck = document.getElementById('btnCheck');
-  const btnAIHelp = document.getElementById('btnAIHelp');
+ // const forceLatexEl = document.getElementById('forceLatex');
+const btnClear = document.getElementById('btnClear');
+// const btnCheck = document.getElementById('btnCheck');
+const btnAIHelp = document.getElementById('btnAIHelp');
   const btnCloseAI = document.getElementById('btnCloseAI');
 
   function setStatus(msg, cls){
@@ -494,7 +494,7 @@ waitForLibraries(function(){
   }
 
   inputEl.addEventListener('input', ()=>debounce(process,120));
-  forceLatexEl.addEventListener('change', process);
+  // forceLatexEl.addEventListener('change', process);
   
   btnClear.addEventListener('click', ()=>{
     inputEl.value=''; document.getElementById('render').innerHTML=''; setStatus('','');
@@ -504,7 +504,7 @@ waitForLibraries(function(){
     inputEl.focus();
   });
   
-  btnCheck.addEventListener('click', ()=>{
+/*  btnCheck.addEventListener('click', ()=>{
     const raw0 = inputEl.value, raw = sanitizeBasic(raw0);
     const latexMode = forceLatexEl.checked || looksLikeLatex(raw);
     const el = document.getElementById('checkMsg');
@@ -528,7 +528,7 @@ waitForLibraries(function(){
       el.className='status ' + (ok?'ok':'bad'); 
       el.textContent = ok ? 'תשובה נכונה' : 'תשובה לא נכונה';
     }
-  });    
+  });    */
 
   // AI Helper
   btnAIHelp.addEventListener('click', async function() {
