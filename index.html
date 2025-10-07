@@ -181,7 +181,11 @@ y = C_1*sin(x) + C_2*cos(x)"></textarea>
 
           <div id="checkMsg" class="status" style="margin-top:10px"></div>
           
-          <div id="aiResponse" class="ai-chat-box" style="display:none"></div>
+         // <div id="aiResponse" class="ai-chat-box" style="display:none"></div>
+		    <div id="aiResponse" class="ai-chat-box" style="display:none">
+            <button class="btn" id="btnCloseAI" style="float:left; font-size:0.85rem; padding:4px 10px">סגירה ×</button>
+            <div id="aiResponseContent"></div>
+</div>
 
           <div class="hint">
 		    • ביטוי מורכב יש לשים בתוך { }<br/>
@@ -551,25 +555,31 @@ waitForLibraries(function(){
     }
   });
 
-  function displayAIResponse() {
-    const aiBox = document.getElementById('aiResponse');
-    let html = '';
-    
-    conversationHistory.forEach((turn, i) => {
-      html += `<div class="ai-message">
-        <strong>התשובה שהוזנה:</strong> <code>${turn.user}</code>
-      </div>`;
-      html += `<div class="ai-message" style="background:#1e2940">
-        <strong>Digital Friend:</strong> ${turn.ai}
-      </div>`;
-    });
-    
-    aiBox.innerHTML = html;
-    
-    if (window.MathJax?.typesetPromise) {
-      MathJax.typesetPromise([aiBox]);
-    }
+function displayAIResponse() {
+  const aiBox = document.getElementById('aiResponseContent');
+  let html = '';
+  
+  conversationHistory.forEach((turn, i) => {
+    html += `<div class="ai-message">
+      <strong>התשובה שהוזנה:</strong> <code>${turn.user}</code>
+    </div>`;
+    html += `<div class="ai-message" style="background:#1e2940">
+      <strong>Digital Friend:</strong> ${turn.ai}
+    </div>`;
+  });
+  
+  aiBox.innerHTML = html;
+  
+  if (window.MathJax?.typesetPromise) {
+    MathJax.typesetPromise([aiBox]);
   }
+}
+
+// כפתור סגירה
+document.getElementById('btnCloseAI').addEventListener('click', function() {
+  document.getElementById('aiResponse').style.display = 'none';
+  conversationHistory = [];
+});
 
   async function loadProblem(index=0){
     const p = problems[index];
