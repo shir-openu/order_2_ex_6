@@ -134,7 +134,7 @@
       <button class="tab-btn" role="tab" aria-selected="true"  aria-controls="tab-ex"   id="tabbtn-ex">תרגיל</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-h1"  id="tabbtn-h1">רמז 1</button>
       <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-h2"  id="tabbtn-h2">רמז 2</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-sol" id="tabbtn-sol">הצגת הפתרון</button>
+  //    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-sol" id="tabbtn-sol">הצגת הפתרון</button>
     </div>
 
     <!-- Panel: תרגיל -->
@@ -233,7 +233,8 @@ const problems = [
     title: 'מסדר שני — וריאציית פרמטרים',
     
     latexProblem: String.raw`y'' + y = \tan x`,
-    exampleInput: String.raw`y = C_1*cos(x) + C_2*sin(x)`,
+    // exampleInput: String.raw`y = C_1*cos(x) + C_2*sin(x)`,
+	exampleInput: String.raw`y = C_1 f(x) + C_2 g(x) + \sin(x) \cdot \ln|x+1| + \frac{x^2}{2}`,
     
     hint1Html: `
       זוהי משוואה לינארית אי-הומוגנית מסדר שני עם מקדמים קבועים.<br/>
