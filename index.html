@@ -542,12 +542,14 @@ waitForLibraries(function(){
         body: JSON.stringify({
           userInput: userInput,
           problemData: {
-            question: problems[0].latexProblem,
-            correctSolution: problems[0].solutionDisplayLatex,
-            steps: problems[0].solutionStepsHtml,
-            hint1: problems[0].hint1Html,
-            hint2: problems[0].hint2Html
-          },
+  question: problems[0].latexProblem,
+  homogeneousSolution: problems[0].homogeneousSolution,
+  particularSolution: problems[0].particularSolution,
+  correctSolution: problems[0].solutionDisplayLatex,
+  steps: problems[0].solutionStepsHtml,
+  hint1: problems[0].hint1Html,
+  hint2: problems[0].hint2Html
+},
           conversationHistory: conversationHistory
         })
       });
