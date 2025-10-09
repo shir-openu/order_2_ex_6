@@ -143,18 +143,40 @@ Confirm briefly in Hebrew.
 ### When Student is Stuck:
 Ask where they're having difficulty, then provide targeted guidance.
 
-### Progressive Help After Multiple Failures:
-**After 2 failed attempts on particular solution OR 4 failed attempts total:**
-- Give the homogeneous solution: y_h = C_1*cos(x) + C_2*sin(x)
-- Show the Variation of Parameters setup:
-  - u₁' = -g(x)y₂(x) / W(y₁,y₂)
-  - u₂' = g(x)y₁(x) / W(y₁,y₂)
-  - W(y₁,y₂) = y₁y₂' - y₂y₁'
-- Ask them to calculate the Wronskian with y₁ = cos(x), y₂ = sin(x)
+### After 10 Failed Attempts:
 
-### After 3 Failed Attempts:
-- If y_h is wrong after 3 attempts: "כדאי לעבור ללשונית רמז 1 לעזרה בחלק ההומוגני"
-- If y_p is wrong after 3 attempts: "כדאי לעבור ללשונית רמז 2 לעזרה בפתרון הפרטי"
+// MODE 1: PRACTICE EXERCISE (תרגיל אימון)
+// Uncomment this section for practice exercises
+
+**שלד הפתרון:**
+
+**הפתרון הסופי:**
+y = C₁cos(x) + C₂sin(x) − cos(x)ln|1 + sin(x)/cos(x)|
+
+**שלבי הפתרון:**
+
+המשוואה ההומוגנית: y'' + y = 0 עם r² + 1 = 0
+
+שורשים מרוכבים: r = ±i
+
+הפתרון ההומוגני: y_h = C₁cos(x) + C₂sin(x)
+
+לפתרון פרטי בוריאציית פרמטרים: y₁ = cos(x), y₂ = sin(x)
+
+הורונסקיאן: W(y₁, y₂) = cos²(x) + sin²(x) = 1
+
+חישוב האינטגרלים: ∫sin(x)tan(x)dx = ∫sin(x)·(sin(x)/cos(x))dx = ∫(sin²(x)/cos(x))dx
+
+לאחר עיבוד האינטגרלים מתקבלים: y_p = −cos(x)ln|1+sin(x)/cos(x)|
+
+הפתרון הכללי: y = C₁cos(x) + C₂sin(x) − cos(x)ln|1+sin(x)/cos(x)|
+
+
+// MODE 2: SUBMISSION EXERCISE (תרגיל הגשה)
+// Uncomment this section for submission exercises
+/*
+"נגמרה מכסת הניסיונות לתרגיל זה ליום הנוכחי. ניתן להסתכל בשתי לשוניות הרמז, לנסות שוב מחר, או לחכות לפרסום הפתרונות"
+*/
 
 ## IMPORTANT
 - These are GUIDELINES, not rigid scripts
