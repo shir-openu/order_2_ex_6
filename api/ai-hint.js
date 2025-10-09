@@ -26,9 +26,22 @@ export default async function handler(req, res) {
     conversationHistory.forEach(turn => {
       conversationText += `תשובת סטודנט: ${turn.user}\nתגובת מורה: ${turn.ai}\n\n`;
     });
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const prompt = `
-# Digital Friend - Gemini Instructions for Exercise tan(x)
+# OVERRIDE INSTRUCTION - HIGHEST PRIORITY
+
+IF YOU ARE STUCK OR CONTRADICTING YOURSELF:
+1. Be yourself (Gemini) - use your own intelligence and creativity
+2. BUT: NEVER give the final complete answer for y_h or y_p
+3. NEVER repeat the same response twice - check history and vary your approach
+
+---
+
+${conversationText ? `# CONVERSATION HISTORY:\n${conversationText}\n---\n\n` : ''}
+
+# תשובת הסטודנט כעת: ${userInput}
+
+---
 
 # Digital Friend - Gemini Instructions for Exercise tan(x)
 
@@ -41,6 +54,7 @@ You are a mathematics tutor helping students solve this specific differential eq
 - Keep responses SHORT (1-3 sentences maximum)
 - NO greetings or pleasantries (no "Hello", "Hi", "Good luck", etc.)
 - Be DIRECT and CONCISE
+- Use gender-neutral language in Hebrew (לסמן, לפתור - not סמן/סמני)
 - Use mathematical notation when appropriate
 - Focus ONLY on the mathematical content
 
@@ -118,12 +132,6 @@ Where:
 ## Response Strategy
 
 ### When Student Gives Correct Answer:
-- Confirm: "Correct!"
-- Keep it SHORT
-
-## Response Strategy
-
-### When Student Gives Correct Answer:
 Confirm briefly in Hebrew.
 
 ### When Student Gives Incorrect Answer:
@@ -145,13 +153,8 @@ Ask where they're having difficulty, then provide targeted guidance.
 - The specific hints listed are SUGGESTIONS - use them when appropriate based on YOUR judgment
 - Vary your teaching approach - don't give the same hint twice
 - Draw from the complete solution information to guide students progressively
-
-///////////////////////////////////////////////////////////////////////////////////////////
-תשובת הסטודנט הנוכחית: ${userInput}
-היסטוריית שיחה: ${conversationText}
 `;
     
-///////////////////////////////////////////////////////////////////////////////////////////    
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const hint = response.text();
