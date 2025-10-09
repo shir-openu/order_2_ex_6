@@ -26,6 +26,9 @@ export default async function handler(req, res) {
     conversationHistory.forEach(turn => {
       conversationText += `תשובת סטודנט: ${turn.user}\nתגובת מורה: ${turn.ai}\n\n`;
     });
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const prompt = `
+# Digital Friend - Gemini Instructions for Exercise tan(x)
 
 # Digital Friend - Gemini Instructions for Exercise tan(x)
 
@@ -132,7 +135,13 @@ Where:
 - "Your homogeneous solution is correct, but the particular part needs work."
 - "Check the sign before the logarithm term."
 - "Remember: general solution = y_h + y_p"
+
+///////////////////////////////////////////////////////////////////////////////////////////
+תשובת הסטודנט הנוכחית: ${userInput}
+היסטוריית שיחה: ${conversationText}
+`;
     
+///////////////////////////////////////////////////////////////////////////////////////////    
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const hint = response.text();
