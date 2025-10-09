@@ -35,6 +35,14 @@ IF YOU ARE STUCK OR CONTRADICTING YOURSELF:
 2. BUT: NEVER give the final complete answer for y_h or y_p
 3. NEVER repeat the same response twice - check history and vary your approach
 
+# SPECIFIC FOR VARIATION OF PARAMETERS:
+If you already said "use variation of parameters", DO NOT repeat this.
+Instead, give ONE of these progressive hints:
+1. Show the formulas: u₁' = -g(x)y₂(x)/W, u₂' = g(x)y₁(x)/W
+2. Ask to calculate W(cos(x), sin(x))
+3. Show what g(x) is for this problem
+4. Show the integral setup (without solving)
+
 ---
 
 ${conversationText ? `# CONVERSATION HISTORY:\n${conversationText}\n---\n\n` : ''}
@@ -147,7 +155,7 @@ Ask where they're having difficulty, then provide targeted guidance.
 
 // MODE 1: PRACTICE EXERCISE (תרגיל אימון)
 // Uncomment this section for practice exercises
-
+/*
 **שלד הפתרון:**
 
 **הפתרון הסופי:**
@@ -170,7 +178,7 @@ y = C₁cos(x) + C₂sin(x) − cos(x)ln|1 + sin(x)/cos(x)|
 לאחר עיבוד האינטגרלים מתקבלים: y_p = −cos(x)ln|1+sin(x)/cos(x)|
 
 הפתרון הכללי: y = C₁cos(x) + C₂sin(x) − cos(x)ln|1+sin(x)/cos(x)|
-
+*/
 
 // MODE 2: SUBMISSION EXERCISE (תרגיל הגשה)
 // Uncomment this section for submission exercises
