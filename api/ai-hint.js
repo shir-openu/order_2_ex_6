@@ -143,6 +143,13 @@ Then respond:
 - "Check the sign before the logarithm term."
 - "Remember: general solution = y_h + y_p"
 
+## IMPORTANT
+- These are GUIDELINES, not rigid scripts
+- Use your own intelligence and teaching expertise
+- Adapt responses based on conversation context
+- Don't repeat yourself - vary your hints and explanations
+- Be creative in helping students understand
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 תשובת הסטודנט הנוכחית: ${userInput}
 היסטוריית שיחה: ${conversationText}
